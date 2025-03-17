@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Fortnite (Simple Touch Controls)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script src="game.js"></script>
+</body>
+</html>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #87CEEB;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    background-color: #f4f4f4;
+}
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Player settings
+const player = {
+    x: canvas.width / 2,
+    y: canvas.height - 150,
+    width: 50,
+    height: 50,
+    speed: 5,
+    velocityY: 0,
+    gravity: 0.8,
+    jumpPower: -15,
+    grounded: false,
+};
+
+// Game loop
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Apply gravity
+    if (player.y + player.height < canvas.height) {
+        player.velocityY += player.gravity;
+        player.grounded = false;
+    } else {
+        player.velocityY = 0;
+        player.grounded = true;
+        player.y = canvas.height - player.height;
+    }
+
+    // Move player
+    player.x += player.velocityX;
+
+    // Drawing the player
+    ctx.fillStyle = "#FF5733";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // Request next frame
+    requestAnimationFrame(gameLoop);
+}
+
+// Controls
+let touchStartX = 0;
+let touchEndX = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+});
+
+document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].clientX;
+    touchEndY = e.changedTouches[0].clientY;
+
+    const swipeThreshold = 100;
+    
+    if (touchEndY < touchStartY - swipeThreshold && player.grounded) {
+        player.velocityY = player.jumpPower;
+    }
+
+    if (touchEndX > touchStartX + swipeThreshold) {
+        player.velocityX = player.speed;
+    } else if (touchEndX < touchStartX - swipeThreshold) {
+        player.velocityX = -player.speed;
+    } else {
+        player.velocityX = 0;
+    }
+});
+
+// Start the game loop
+gameLoop();
